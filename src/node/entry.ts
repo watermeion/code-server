@@ -2,12 +2,9 @@ import { field, logger } from "@coder/logger"
 import * as cp from "child_process"
 import * as path from "path"
 import { CliMessage } from "../../lib/vscode/src/vs/server/ipc"
-import { ApiHttpProvider } from "./app/api"
-import { DashboardHttpProvider } from "./app/dashboard"
 import { LoginHttpProvider } from "./app/login"
 import { ProxyHttpProvider } from "./app/proxy"
 import { StaticHttpProvider } from "./app/static"
-import { UpdateHttpProvider } from "./app/update"
 import { VscodeHttpProvider } from "./app/vscode"
 import { Args, bindAddrFromAllSources, optionDescriptions, parse, readConfigFile, setDefaults } from "./cli"
 import { AuthType, HttpServer, HttpServerOptions } from "./http"
@@ -73,13 +70,10 @@ const main = async (args: Args, cliArgs: Args, configArgs: Args): Promise<void> 
   }
 
   const httpServer = new HttpServer(options)
-  const vscode = httpServer.registerHttpProvider("/", VscodeHttpProvider, args)
-  const api = httpServer.registerHttpProvider("/api", ApiHttpProvider, httpServer, vscode, args["user-data-dir"])
-  const update = httpServer.registerHttpProvider("/update", UpdateHttpProvider, false)
+  httpServer.registerHttpProvider("/", VscodeHttpProvider, args)
   httpServer.registerHttpProvider("/proxy", ProxyHttpProvider)
   httpServer.registerHttpProvider("/login", LoginHttpProvider, args.config!, envPassword)
   httpServer.registerHttpProvider("/static", StaticHttpProvider)
-  httpServer.registerHttpProvider("/dashboard", DashboardHttpProvider, api, update)
 
   ipcMain().onDispose(() => httpServer.dispose())
 
